@@ -1,0 +1,23 @@
+steps:
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['build', '-t', 'us-east1-docker.pkg.dev/cloud-assignment-3-390202/applications/app1:$COMMIT_SHA', '.']
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push', 'us-east1-docker.pkg.dev/cloud-assignment-3-390202/applications/app1:$COMMIT_SHA']
+- name: 'gcr.io/cloud-builders/gcloud'
+  entrypoint: 'bash'
+  args:
+    - '-c'
+    - |
+      gcloud container clusters get-credentials cloud-assignment-3 --region us-east1  
+- name: 'gcr.io/cloud-builders/gke-deploy'
+  id: Deployment
+  args:
+    [
+      'run',
+      '--filename=deployment.yaml',
+      '--image=us-east1-docker.pkg.dev/cloud-assignment-3-390202/applications/app1:$COMMIT_SHA',
+      '--location=us-east1',
+      '--cluster=cloud-assignment-3',
+    ]   
+images:
+- 'us-east1-docker.pkg.dev/cloud-assignment-3-390202/applications/app1'

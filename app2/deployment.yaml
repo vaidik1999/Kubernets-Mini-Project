@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app2
+  labels:
+    app: app2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app2
+  template:
+    metadata:
+      name: app2-pods
+      labels:
+        app: app2
+    spec:
+      containers:
+        - name: app2-node
+          image: us-east1-docker.pkg.dev/cloud-assignment-3-390202/applications/app2:latest
+          ports:
+            - containerPort: 3000
+          volumeMounts:
+            - name: myvolume
+              mountPath: "/Vaidik_PV_dir"
+      volumes:
+        - name: myvolume
+          persistentVolumeClaim:
+            claimName: vaid-pv
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: app2-service
+spec:
+  selector:
+    app: app2
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: 3000

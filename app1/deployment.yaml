@@ -1,0 +1,56 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: vaid-pv
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: standard
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app1
+  labels:
+    app: app1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app1
+  template:
+    metadata:
+      name: app1-pods
+      labels:
+        app: app1
+    spec:
+      containers:
+        - name: app1-node
+          image: us-east1-docker.pkg.dev/cloud-assignment-3-390202/applications/app1:latest
+          ports:
+            - containerPort: 6000
+          volumeMounts:
+            - name: myvolume
+              mountPath: "/Vaidik_PV_dir"
+      volumes:
+        - name: myvolume
+          persistentVolumeClaim:
+            claimName: vaid-pv
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: app1-service
+spec:
+  selector:
+    app: app1
+  type: LoadBalancer
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 6000
